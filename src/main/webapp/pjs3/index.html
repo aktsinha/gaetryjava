@@ -3,43 +3,14 @@
  <head>
   <title>Hello Web - Processing.js Test</title>
    <script src="processing.js"></script>
+   <script src="polyfil.js"></script>
  </head>
  <body>
    <canvas id='canvas1'></canvas>
    <script>
-    function sketchProc(processing) {
-      var p = processing;
+    var game = {}, p;
+    game.size = {width:800, height:600};
     
-      var ball_x, ball_y, ball_dir = 1, ball_size = 5;  // Radius
-
-      var dy = 0;  // Direction
-
-      // Global variables for the paddle
-      var paddle_width = 5, paddle_height = 20, dist_wall = 15;
-      
-      var game = {};
-      game.size = {width:800, height:600};
-
-      p.setup = function ()
-      {
-        p.size(game.size.width, game.size.height);
-        p.frameRate(24);
-
-        p.rectMode(p.CENTER_RADIUS);
-
-        p.ellipseMode(p.CENTER_RADIUS);
-
-        p.noStroke();
-
-        p.smooth();
-        
-        //p.noLoop();
-
-        ball_y = p.height/2;
-
-        ball_x = 1;
-      }
-      
       var create_box = function (params) {
         var box = {};
         
@@ -56,51 +27,176 @@
       };
       
       var box = create_box();
-      var balloons = [];
+      var balloons = [], bullets = [];
       
       var create_balloon = function() {
         var balloon = {};
         balloon.width = 15;
         balloon.height = 50;
         balloon.y = 20 + balloon.height;
+        balloon.impactHeight = balloon.y + balloon.height;
         balloon.x = 0|(p.random(balloon.width, game.size.width - balloon.width));
-        
+
+        balloon.impacted = false;        
+
         balloon.draw = function () {
+          this.impacted && p.fill(255, 0, 0);
           p.ellipse(this.x, this.y, this.width, this.height);
           p.line(this.x, this.y, this.x, this.y + 2 * this.height);
           p.stroke(255);
+          this.impacted && p.fill(255);
         }
         
         balloons.push(balloon);
         return balloon;
       }
+      
+      var shooting = {};
+      shooting.create_bullet = function () {
+        var bullet = {};
+        bullet.width = 4;
+        bullet.height = 4;
+        bullet.x = box.x;
+        bullet.y = box.y;
+        
+        bullet.impacted = false;
+        
+        bullet.draw = function () {
+          if(this.impacted) {
+            p.fill(255, 0, 0);
+          }
+          p.ellipse(this.x, this.y, this.width, this.height);
+          this.impacted && p.fill(255);
+        }
+        
+        bullet.isOutOfBounds = function(){
+          return this.y <= 0;
+        }
+        
+        bullet.impactedBalloons = function (){
+          return balloons.filter(function(balloon, index){
+            var result = (Math.abs(this.x - balloon.x) < balloon.width + this.width) && 
+              (Math.abs(this.y - balloon.y) < balloon.height + this.height);
+            
+            this.impacted = this.impacted || result;
+            balloon.impacted = balloon.impacted || result;
+            
+            return result;
+          }, this);
+        }
+        
+        bullet.doFrame = function () {
+          this.y -= 10;
+          this.impactedBalloons();
+        }
+        
+        bullets.push(bullet);
+        return bullet;
+      }
+/*      
+      shooting.checkImpacts = function(){
+        shooting.getImpactHeightBullets().forEach(function(bullet){
+          bullet.impactedBalloons().forEach(function(balloon){
+            balloon.impacted = true;
+            bullet.impacted = true;
+          });
+        });
+      }
+      
+      shooting.doFrame = function (){
+        bullets.forEach(function (bullet){
+          bullet.doFrame();
+          bullet.draw();
+        });
+        shooting.fixOutOfBounds();
+        
+        //bullet.
+      };
+      
+      shooting.getImpactHeightBulllets = function (){
+        var result = [], impactHeight, firstBelowImpactHeight;
+        if(!balloons[0]){
+          return [];
+        }
+        impactHeight = balloons[0].impactHeight;
+        
+        firstBelowImpactHeight = bullets.findIndex(function (bullet, index){
+          return (bullet.y > impactHeight + bullet.height);
+        });
+        
+        if(firstBelowImpactHeight < 0){
+          firstBelowImpactHeight = bullets.length;
+        }
+        
+        result.push(bullets.slice(0, firstBelowImpactHeight));
+        return result;
+      }
+*/      
+      shooting.fixOutOfBounds = function () {
+        var firstInBounds = bullets.length;
+        bullets.some(function (bullet, index){
+          if(bullet.isOutOfBounds() === false){
+            firstInBounds = index;
+            return true;
+          } else {
+            return false;
+          }
+        });
+        
+        bullets.splice(0, firstInBounds);
+        return bullets;
+      }
+      
+      var shoot = function () {
+        shooting.create_bullet();
+      }
 
+    function sketchProc(processing) {
+      p = processing;
+
+      p.setup = function ()
+      {
+        p.size(game.size.width, game.size.height);
+        p.frameRate(24);
+
+        p.rectMode(p.CENTER_RADIUS);
+        p.ellipseMode(p.CENTER_RADIUS);
+        p.noStroke();
+        p.smooth();
+        //p.noLoop();
+      }
+      
       p.draw = function ()
       {
         var i;
         
         p.background(51);        
         box.draw();
+        
+        balloons = balloons.filter(function(balloon){
+          return balloon.impacted === false;
+        });
 
         if(p.frameCount % 64 === 0 && balloons.length < 8) {
           create_balloon();
         }
+        
+        bullets.forEach(function(bullet){
+          bullet.doFrame();
+          bullet.draw();
+        });
+        shooting.fixOutOfBounds();
+        
         for(i = 0; i< balloons.length; i++) {
           balloons[i].draw();
         }
+        
+
       };
       
-      var shoot = function () {
-        var i;
-        for(i = 0; i< balloons.length; i++) {
-          if(Math.abs(box.x - balloons[i].x) < balloons[i].width) {
-            balloons.splice(i, 1);i--;
-          }
-        }
-      }
-      
+  
       p.keyPressed = function () {
-        console.log(p.keyCode + ":" + p.LEFT);
+        //console.log(p.keyCode + ":" + p.LEFT);
         if(p.keyCode === p.LEFT) {
           box.x -= 16;
           return;
