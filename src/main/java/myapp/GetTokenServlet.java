@@ -28,8 +28,10 @@ public class GetTokenServlet extends HttpServlet {
       return;
     }
     ChannelService channelService = ChannelServiceFactory.getChannelService();
+    String token = channelService.createChannel(channelKey);
+    
     resp.setContentType("text/plain");
-    resp.getWriter().println(channelService.createChannel(channelKey));
+    resp.getWriter().println("{ \"token\": \"" + token + "\" }");
     return;
   }
 }

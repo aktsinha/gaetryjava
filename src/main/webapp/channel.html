@@ -56,9 +56,9 @@ $(document).ready(function() {
   $.post( "/token", { 'channel': channelId }, function( data ) {
     console.log("token: " + data);
     $( "#result1" ).html( data );
-    token = data;
+    token = JSON.parse(data).token;
     
-    var channel = new goog.appengine.Channel(data);
+    var channel = new goog.appengine.Channel(token);
     var socket = channel.open();
     socket.onopen = function(){
       console.log("opened");
