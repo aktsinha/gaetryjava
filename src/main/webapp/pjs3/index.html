@@ -86,7 +86,7 @@
         }
         
         bullet.doFrame = function () {
-          this.y -= 10;
+          this.y -= Math.round(20 * 24/ p.__frameRate);
           this.impactedBalloons();
         }
         
@@ -157,7 +157,7 @@
       p.setup = function ()
       {
         p.size(game.size.width, game.size.height);
-        p.frameRate(24);
+        //p.frameRate(64);
 
         p.rectMode(p.CENTER_RADIUS);
         p.ellipseMode(p.CENTER_RADIUS);
@@ -177,7 +177,7 @@
           return balloon.impacted === false;
         });
 
-        if(p.frameCount % 64 === 0 && balloons.length < 8) {
+        if((p.frameCount) % (1 * Math.round(p.__frameRate) ) === 0 && balloons.length < 8) {
           create_balloon();
         }
         
@@ -198,11 +198,11 @@
       p.keyPressed = function () {
         //console.log(p.keyCode + ":" + p.LEFT);
         if(p.keyCode === p.LEFT) {
-          box.x -= 16;
+          box.x -= 16;//Math.round(16 * 24/ p.__frameRate);
           return;
         }
         if(p.keyCode === p.RIGHT) {
-          box.x += 16;
+          box.x += 16;//Math.round(16 * 24/ p.__frameRate);
           return;
         }
         
