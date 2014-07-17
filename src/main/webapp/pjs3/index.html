@@ -34,7 +34,7 @@
         balloon.width = 15;
         balloon.height = 50;
         balloon.y = 20 + balloon.height;
-        balloon.impactHeight = balloon.y + balloon.height;
+        //balloon.impactHeight = balloon.y + balloon.height;
         balloon.x = 0|(p.random(balloon.width, game.size.width - balloon.width));
 
         balloon.impacted = false;        
@@ -221,14 +221,13 @@
   var combinations = function (length, chars) {
     var i, result = [[]];
     
-    for (i = 0; i < length; i++) {
-    
-      result = result.map(function(a){
-        return chars.map(function(b){
-          return a.concat([b]);
+    for (i = 0; i < length; i++) {    
+      result = result.map(function (combinationsWithIBits){
+        return chars.map(function (aCharAtNextBit){
+          return combinationsWithIBits.concat([aCharAtNextBit]);
         });
-      }).reduce(function(a,b){
-        return a.concat(b);
+      }).reduce(function (partlyFlattenedArray, nextSubArray){
+        return partlyFlattenedArray.concat(nextSubArray);
       });
     }
     

@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Channel Demo</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script type="text/javascript" src="/_ah/channel/jsapi"></script>
+  </head>
+  <body>
+    <div id="result1">Loading...</div>
+    <div id="result2">Send status</div>
+    <div id="result3">Received message</div>
+    
+    Message: <textarea id='mytextarea'>Type a message here</textarea>
+    <br/>
+    Channel: <input id='channelBox' type='text' placeholder='999'/>
+    <br/>
+    <input id='mybutton' type='button' value='Send'/>
+
+    <script>
+    var token, channelId;
+    var sendMessage = function (channelId, message){
+      $.post( "/message", { 'channel': channelId, 'message': message }, function( data ) {
+        console.log("message response: " + data);
+        $( "#result2" ).html( data );
+      });
+    };
+    
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+$(document).ready(function() {
+  $('input#mybutton').click(function() {
+      var message = $('textarea#mytextarea').val();
+      console.log("text to send:" + message);
+      
+      var channelId = $('input#channelBox').val();
+      console.log("Channel Id" + channelId);
+      
+      if(!channelId) {
+        alert("Please enter a channel Id");
+        return;
+      }
+      
+      sendMessage(channelId, message);
+  });
+});
+    
+$(document).ready(function() {
+  channelId = getParameterByName('channel');
+  channelId = channelId || '999';
+
+  $.post( "/token", { 'channel': channelId }, function( data ) {
+    console.log("token: " + data);
+    $( "#result1" ).html( data );
+    token = data;
+    
+    var channel = new goog.appengine.Channel(data);
+    var socket = channel.open();
+    socket.onopen = function(){
+      console.log("opened");
+    };
+    socket.onmessage = function(message){
+      console.log("message: ");
+      console.log(message);
+      $( "#result3" ).html( message.data );
+    };
+    socket.onerror = function(error){
+      console.log("error: ");
+      console.log(error);
+    };
+    socket.onclose = function(){
+      console.log("closed");
+    };
+    
+    
+  });
+  
+  
+});
+    </script>
+  </body>
+</html>

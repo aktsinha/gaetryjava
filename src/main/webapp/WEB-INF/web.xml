@@ -8,10 +8,28 @@
         <servlet-name>demo</servlet-name>
         <servlet-class>myapp.DemoServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>token</servlet-name>
+        <servlet-class>myapp.GetTokenServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>message</servlet-name>
+        <servlet-class>myapp.MessageServlet</servlet-class>
+    </servlet>
+    
     <servlet-mapping>
         <servlet-name>demo</servlet-name>
         <url-pattern>/demo</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>token</servlet-name>
+        <url-pattern>/token</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>message</servlet-name>
+        <url-pattern>/message</url-pattern>
+    </servlet-mapping>
+    
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
