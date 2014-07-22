@@ -10,6 +10,10 @@ startButton.onclick = createConnection;
 sendButton.onclick = sendData;
 closeButton.onclick = closeDataChannels;
 
+var sdpConstraints = {'mandatory': {
+                      'OfferToReceiveAudio': true,
+                      'OfferToReceiveVideo': true }};
+
 function trace(text) {
   console.log((performance.now() / 1000).toFixed(3) + ": " + text);
 }
@@ -32,7 +36,7 @@ function createConnection() {
   var servers = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
     gaeChannel.onmessage = onSignalMessage;
     
-  window.localPeerConnection = new webkitRTCPeerConnection(servers,
+  window.localPeerConnection = new RTCPeerConnection(servers,
     {optional: [{RtpDataChannels: true}]});
   trace('Created local peer connection object localPeerConnection');
 
@@ -58,7 +62,7 @@ function createConnection() {
   remotePeerConnection.onicecandidate = gotRemoteIceCandidate;
   remotePeerConnection.ondatachannel = gotReceiveChannel;
   */
-  localPeerConnection.createOffer(gotLocalDescription);
+  localPeerConnection.createOffer(gotLocalDescription, function(){},{});
   startButton.disabled = true;
   closeButton.disabled = false;
 }

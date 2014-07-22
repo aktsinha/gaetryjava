@@ -20,7 +20,7 @@ function onSignalMessage(message){
     if(JSON.parse(message).sdp){
       console.log("signal had sdp");
       remotePeerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(message)));
-      remotePeerConnection.createAnswer(gotRemoteDescription);
+      remotePeerConnection.createAnswer(gotRemoteDescription, function(){}, {});
       return;
     } else if(JSON.parse(message).candidate) {
       console.log("signal had candidate");
@@ -52,7 +52,7 @@ function createConnection() {
   sendChannel.onclose = handleSendChannelStateChange;
 */
 
-  window.remotePeerConnection = new webkitRTCPeerConnection(servers,
+  window.remotePeerConnection = new RTCPeerConnection(servers,
     {optional: [{RtpDataChannels: true}]});
   trace('Created remote peer connection object remotePeerConnection');
 
@@ -90,12 +90,13 @@ function closeDataChannels() {
   dataChannelSend.placeholder = "Press Start, enter some text, then press Send.";
 }
 
+/*
 function gotLocalDescription(desc) {
   localPeerConnection.setLocalDescription(desc);
   trace('Offer from localPeerConnection \n' + desc.sdp);
   remotePeerConnection.setRemoteDescription(desc);
   remotePeerConnection.createAnswer(gotRemoteDescription);
-}
+}*/
 
 function gotRemoteDescription(desc) {
   remotePeerConnection.setLocalDescription(desc);
