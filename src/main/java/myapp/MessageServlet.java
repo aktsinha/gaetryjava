@@ -36,7 +36,7 @@ public class MessageServlet extends HttpServlet {
     ChannelService channelService = ChannelServiceFactory.getChannelService();
     channelService.sendMessage(new ChannelMessage(channelKey, message));
     resp.setContentType("text/plain");
-    resp.getWriter().println("ok");
+    resp.getWriter().println("ok"+message+"END");
     return;
   }
 }
